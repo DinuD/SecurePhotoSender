@@ -32,6 +32,7 @@
         app:iconGravity="textStart"
         app:icon="@drawable/ic_camera_alt_black_24dp"
         app:iconPadding="0dp"
+        style="@style/Widget.MaterialComponents.Button.Icon"
         app:layout_constraintTop_toBottomOf="@id/browse_btn"
         app:layout_constraintBottom_toTopOf="@id/label"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -52,12 +53,29 @@
 
     <TextView
         android:id="@+id/code_value"
-        android:text="01234567"
+        android:text=""
         app:layout_constraintTop_toBottomOf="@id/label"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         android:textSize="25sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/copy_btn"
+        android:insetLeft="0dp"
+        android:insetTop="0dp"
+        android:insetRight="0dp"
+        android:insetBottom="0dp"
+        app:iconGravity="textStart"
+        app:icon="@drawable/ic_content_copy_black_24dp"
+        app:iconPadding="0dp"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        app:layout_constraintTop_toTopOf="@id/code_value"
+        app:layout_constraintBottom_toBottomOf="@id/code_value"
+        app:layout_constraintLeft_toRightOf="@id/code_value"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="48dp"
+        android:layout_height="48dp" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
