@@ -6,7 +6,9 @@ import android.os.Bundle;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +25,8 @@ import model.PhotoDatabase;
  * A simple {@link Fragment} subclass.
  */
 public class HistoryFragment extends Fragment {
+
+    private ArrayList<Photo> arrayList;
 
     public HistoryFragment() {
         // Required empty public constructor
@@ -42,9 +46,20 @@ public class HistoryFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        ArrayList<Photo> arrayList = getAllPhotos(MainActivity.db);
+        arrayList = getAllPhotos(MainActivity.db);
         MainActivity.adapter = new PhotoAdapter(getContext(), arrayList);
         ListView listView = view.findViewById(R.id.history_list);
         listView.setAdapter(MainActivity.adapter);
+
+        final SwipeRefreshLayout pullToRefresh = view.findViewById(R.id.pull_to_refresh);
+        pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Log.d("refresh", "Refreshing");
+                arrayList.clear();
+                arrayList = getAllPhotos(MainActivity.db);
+                pullToRefresh.setRefreshing(false);
+            }
+        });
     }
 }

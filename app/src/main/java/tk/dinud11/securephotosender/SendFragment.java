@@ -12,8 +12,11 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -33,6 +36,10 @@ import com.google.firebase.storage.ListResult;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.File;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -56,6 +63,10 @@ public class SendFragment extends Fragment {
     private TextView value;
     private MaterialButton browse;
     private MaterialButton copy;
+    private MaterialButton camera;
+    String currentPhotoPath;
+
+    static final int REQUEST_TAKE_PHOTO = 1;
 
     public SendFragment() {
         // Required empty public constructor
@@ -73,6 +84,7 @@ public class SendFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         value = view.findViewById(R.id.code_value);
         browse = view.findViewById(R.id.browse_btn);
+        camera = view.findViewById(R.id.camera_btn);
         copy = view.findViewById(R.id.copy_btn);
         copy.setVisibility(View.GONE);
         browse.setOnClickListener(new View.OnClickListener() {
@@ -81,6 +93,51 @@ public class SendFragment extends Fragment {
                 performFileSearch();
             }
         });
+        camera.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+    }
+
+    private void dispatchTakePictureIntent() {
+        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        // Ensure that there's a camera activity to handle the intent
+        if (takePictureIntent.resolveActivity(getContext().getPackageManager()) != null) {
+            // Create the File where the photo should go
+            File photoFile = null;
+            try {
+                photoFile = createImageFile();
+            } catch (IOException ex) {
+                // Error occurred while creating the File
+            }
+            // Continue only if the File was successfully created
+            if (photoFile != null) {
+                Uri photoURI = FileProvider.getUriForFile(getContext(),
+                        "tk.dinud11.securephotosender.fileprovider",
+                        photoFile);
+                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
+                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
+                Log.d("intent", photoURI.toString());
+            }
+        }
+    }
+
+    private File createImageFile() throws IOException {
+        // Create an image file name
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String imageFileName = "JPEG_" + timeStamp + "_";
+        File storageDir = getContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES);
+        File image = File.createTempFile(
+                imageFileName,  /* prefix */
+                ".jpg",         /* suffix */
+                storageDir      /* directory */
+        );
+
+        // Save a file: path for use with ACTION_VIEW intents
+        currentPhotoPath = image.getAbsolutePath();
+        return image;
     }
 
     public void performFileSearch() {
@@ -130,7 +187,9 @@ public class SendFragment extends Fragment {
             public void onSuccess(Uri uri) {
                 Log.d("uri", uri.toString());
                 Photo photo = new Photo(code, uri.toString(), true);
-                MainActivity.addPhoto(photo);
+                if(MainActivity.addPhoto(photo) == null)
+                    Toast.makeText(getContext(), "Photo has been already added to history",
+                            Toast.LENGTH_SHORT).show();
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

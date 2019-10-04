@@ -4,8 +4,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager.widget.ViewPager;
 
 import android.content.ClipboardManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Toast;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.firebase.storage.FirebaseStorage;
@@ -24,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE, WindowManager.LayoutParams.FLAG_SECURE);
         setContentView(R.layout.activity_main);
         ViewPager pager = findViewById(R.id.viewpager);
         SimpleFragmentPagerAdapter adapter = new SimpleFragmentPagerAdapter(this, getSupportFragmentManager());
@@ -37,7 +41,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public static Photo addPhoto(Photo photo) {
-        db.photoDao().insertAll(photo);
+        if(db.photoDao().findByCode(photo.getCode()) == null)
+            db.photoDao().insertAll(photo);
+        else
+            return null;
         return photo;
     }
 
